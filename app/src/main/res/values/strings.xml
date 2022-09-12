@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NeRecipe</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <string name="recipe_view">Просмотр рецепта</string>
+    <string name="back">Назад</string>
+</resources>

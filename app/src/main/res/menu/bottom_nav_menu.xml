@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/all_recipes_nav_fragment"
+        android:title="Все рецепты"
+        android:icon="@drawable/ic_recipe_24" />
+
+    <item android:id="@+id/favorite_recipes_nav_fragment"
+        android:title="Избранное"
+        android:icon="@drawable/ic_favorite_24" />
+
+    <item android:id="@+id/create_recipe_nav_fragment"
+        android:title="Новый рецепт"
+        android:icon="@drawable/ic_add_recipe_24" />
+</menu>
