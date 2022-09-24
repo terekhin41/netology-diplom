@@ -3,7 +3,7 @@ package ru.netology.nerecipe.db
 import ru.netology.nerecipe.Recipe
 import ru.netology.nerecipe.Step
 
-internal fun AllRecipeEntity.toModel() = Recipe(
+internal fun RecipesEntity.toModel() = Recipe(
     id = id,
     title = title,
     category = category,
@@ -11,7 +11,7 @@ internal fun AllRecipeEntity.toModel() = Recipe(
     favorite = favorite
 )
 
-internal fun Recipe.toEntity() = AllRecipeEntity(
+internal fun Recipe.toEntity() = RecipesEntity(
     id = id,
     title = title,
     category = category,
@@ -20,17 +20,13 @@ internal fun Recipe.toEntity() = AllRecipeEntity(
 )
 
 internal fun StepsEntity.toModel() = Step(
-    id = id,
+    recipeId = recipeId,
     position = position,
     text = text,
     imgPath = imgPath
 )
 
-internal fun Step.toEntity(
-    recipeId: Long,
-    position: Int
-) = StepsEntity(
-    id = id,
+internal fun Step.toEntity() = StepsEntity(
     recipeId = recipeId,
     position = position,
     text = text,

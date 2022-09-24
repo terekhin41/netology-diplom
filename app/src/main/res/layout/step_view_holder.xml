@@ -29,23 +29,24 @@
             android:id="@+id/step_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
             android:gravity="center_horizontal"
             android:singleLine="true"
             android:textSize="25sp"
-            app:layout_constraintEnd_toStartOf="@id/delete_step_button"
+            android:paddingStart="48dp"
+            android:paddingEnd="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="000000000000000" />
+            tools:text="0000000000000000000000000" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/step_image"
-        android:layout_width="256dp"
-        android:layout_height="200dp"
+        android:layout_width="232dp"
+        android:layout_height="156dp"
         android:layout_margin="8dp"
-        android:scaleType="centerInside"
         android:background="@drawable/black_border"
+        android:scaleType="centerInside"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/step_header"

@@ -2,47 +2,52 @@ package ru.netology.nerecipe.viewModel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import ru.netology.nerecipe.Category
 import ru.netology.nerecipe.Recipe
 import ru.netology.nerecipe.Step
+import ru.netology.nerecipe.adapter.RecipeInteractionListener
 import ru.netology.nerecipe.adapter.StepInteractionListener
-import ru.netology.nerecipe.impl.AllRecipeDB
+import ru.netology.nerecipe.db.toModel
+import ru.netology.nerecipe.impl.AppDB
 import ru.netology.nerecipe.impl.RecipeRepository
 import ru.netology.nerecipe.impl.RecipeRepositoryImpl
-import ru.netology.nerecipe.impl.StepDB
-import ru.netology.nmedia.util.SingleLiveEvent
+import ru.netology.nerecipe.util.SingleLiveEvent
 
 class RecipeViewModel (application: Application
-) : AndroidViewModel(application), StepInteractionListener {
-
+) : AndroidViewModel(application),
+    StepInteractionListener,
+    RecipeInteractionListener {
 
     private val repository: RecipeRepository =
         RecipeRepositoryImpl(
-            recipeDao = AllRecipeDB.getInstance(
+            recipeDao = AppDB.getInstance(
                 context = application
-            ).recipeDao,
-            stepDao = StepDB.getInstance(
-                context = application
-            ).stepDao
+            ).dao
         )
 
     val allRecipeData by repository::allRecipeData
     val favoriteRecipeData by repository::favoriteRecipeData
 
-    val favoriteRecipe = SingleLiveEvent<String>()
-    val navigateToCreateRecipe = SingleLiveEvent<Long>()
-    val navigateToAddImage = SingleLiveEvent<String>()
     val navigateToRecipe = SingleLiveEvent<Long>()
     val indexedSteps = SingleLiveEvent<List<Step>>()
-    private var currentRecipe : Recipe? = null
+    val filteredAllRecipesList = SingleLiveEvent<List<Recipe>>()
+    val filteredFavoriteRecipesList = SingleLiveEvent<List<Recipe>>()
+    val recipesFilters = SingleLiveEvent<MutableMap<Category, Boolean>>()
+    var currentRecipe : Recipe? = null
+
+    init {
+        val filters = mutableMapOf<Category, Boolean>()
+        Category.values().forEach { filters[it] = true }
+        recipesFilters.value = filters
+    }
+
 
     fun createIndexedStep(position: Int, text: String, imgPath: String? = null) {
         val step = Step(
-            id = RecipeRepository.NEW_STEP_ID,
             position = position,
             text = text,
             imgPath = imgPath)
         indexedSteps.value = indexedSteps.value?.plus(listOf(step)) ?: listOf(step)
-        println(indexedSteps.value)
     }
 
     override fun indexedStepDelete(step: Step) {
@@ -58,65 +63,79 @@ class RecipeViewModel (application: Application
             category = category,
             author = author,
         ) ?: Recipe(
-            id = RecipeRepository.NEW_RECIPE_ID,
+            id = repository.getLastRecipeId() + 1L,
             title = title,
             category = category,
             author = author
         )
-        recipe.steps = indexedSteps.value ?: emptyList()
-        repository.save(recipe)
+        val steps = indexedSteps.value?.map { it.copy(recipeId = recipe.id) } ?: emptyList()
+        repository.save(recipe, steps)
         currentRecipe = null
         indexedSteps.value = emptyList()
     }
 
-    /*fun createPost(content: String) {
-        if (content.isBlank()) return
-        val post = currentPost?.copy(
-            content = content
-        ) ?: Post(
-            id = PostRepository.NEW_POST_ID,
-            author = "Нетология — обучение современным профессиям онлайн",
-            content = content,
-            published = "Today"
-        )
-        repository.save(post)
-        currentPost = null
+    override fun favorite(recipeId: Long) {
+        repository.favorite(recipeId)
     }
 
-    override fun onAddClicked() {
-        currentPost = null
-        navigateToCreatePost.call()
+    override fun navigateToRecipe(recipeId: Long) {
+        navigateToRecipe.value = recipeId
     }
 
-    override fun onLikeClicked(post: Post) {
-        repository.like(post.id)
+    override fun onDeleteClicked(recipeId: Long) {
+        repository.delete(recipeId)
     }
 
-    override fun onShareClicked(post: Post) {
-        sharePostContent.value = post.content
-        repository.share(post.id)
+    fun addDefaultData() {
+        if (allRecipeData.value == null || allRecipeData.value?.size == 0)
+            repository.addDefaultData()
     }
 
-    override fun onRemoveClicked(post: Post) {
-        repository.delete(post.id)
+    fun searchAllRecipes(query: String?) {
+        if (query != null) {
+            filteredAllRecipesList.value = allRecipeData.value
+                ?.filter { it.title.contains(query, ignoreCase = true) }
+                .also { filterAllRecipes(it) }
+        } else {
+            filteredAllRecipesList.value = allRecipeData.value
+            filterAllRecipes()
+        }
     }
 
-    override fun onEditClicked(post: Post) {
-        currentPost = post
-        navigateToCreatePost.value = post.content
+    fun searchFavoriteRecipes(query: String?) {
+        if (query != null) {
+            filteredFavoriteRecipesList.value = favoriteRecipeData.value
+                ?.filter { it.title.contains(query, ignoreCase = true) }
+                .also { filterFavoriteRecipes(it) }
+        } else {
+            filteredFavoriteRecipesList.value = favoriteRecipeData.value
+            filterFavoriteRecipes()
+        }
     }
 
-    override fun onPlayClicked(post: Post) {
-        val url : String = if (post.videoUrl != null) post.videoUrl!! else return
-        navigateToPlayVideo.value = url
+    fun filterAllRecipes(currentList: List<Recipe>? = null) {
+        val result = currentList ?: allRecipeData.value
+        filteredAllRecipesList.value = result?.filter { recipe ->
+            lateinit var category : Category
+            Category.values().forEach { if (it.key == recipe.category) category = it }
+            recipesFilters.value?.get(category) ?: true
+        } ?: return
     }
 
-    override fun onPostClicked(post: Post) {
-        navigateToPost.value = post.id
+    fun filterFavoriteRecipes(currentList: List<Recipe>? = null) {
+        val result = currentList ?: favoriteRecipeData.value
+        filteredFavoriteRecipesList.value = result?.filter { recipe ->
+            lateinit var category : Category
+            Category.values().forEach { if (it.key == recipe.category) category = it }
+            recipesFilters.value?.get(category) ?: true
+        } ?: return
     }
 
-    fun getPostById(id: Long): Post? {
-        return repository.getPostById(id)
-    }*/
+    fun getRecipeById(id: Long) : Recipe? {
+        return repository.getRecipeById(id)?.recipe?.toModel()
+    }
 
+    fun getRecipesStepsById(id: Long) : List<Step>? {
+        return repository.getRecipeById(id)?.steps?.map { it.toModel() }
+    }
 }

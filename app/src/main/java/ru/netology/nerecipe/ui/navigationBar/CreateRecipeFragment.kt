@@ -5,11 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import ru.netology.nerecipe.Category
+import ru.netology.nerecipe.R
 import ru.netology.nerecipe.adapter.IndexedStepAdapter
+import ru.netology.nerecipe.adapter.dragAndDrop.SimpleItemTouchHelperCallback
 import ru.netology.nerecipe.databinding.CreateRecipeFragmentBinding
 import ru.netology.nerecipe.util.sendMyNotification
 import ru.netology.nerecipe.viewModel.RecipeViewModel
@@ -17,6 +21,8 @@ import ru.netology.nerecipe.viewModel.RecipeViewModel
 class CreateRecipeFragment : Fragment() {
 
     private lateinit var categoryArrayAdapter : ArrayAdapter<String>
+
+    private lateinit var binding: CreateRecipeFragmentBinding
 
     private val viewModel: RecipeViewModel by activityViewModels()
 
@@ -39,34 +45,43 @@ class CreateRecipeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = CreateRecipeFragmentBinding.inflate(inflater, container, false).also { binding ->
+        this.binding = binding
         binding.categorySpinner.adapter = categoryArrayAdapter
         val adapter = IndexedStepAdapter(viewModel)
-        binding.stepsRecyclerView.layoutManager = LinearLayoutManager(context);
+        binding.stepsRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.stepsRecyclerView.adapter = adapter
+        val callback: ItemTouchHelper.Callback = SimpleItemTouchHelperCallback(adapter)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(binding.stepsRecyclerView)
         binding.createStepView.stepTitle.text = "Этап №1"
 
         viewModel.indexedSteps.observe(viewLifecycleOwner) { steps ->
             adapter.submitList(steps)
-            stepIndex = steps.size + 1
-            binding.createStepView.stepTitle.text = "Этап №${stepIndex}"
-  1      }
+            stepIndex = steps.size
+            prepareStepView()
+        }
 
         with(binding.createStepView) {
-            deleteStepButton.setOnClickListener {
-                it.visibility = View.GONE
+            val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
+                if (it != null) {
+                    stepImage.setImageURI(it)
+                    stepImage.tag = it
+                    stepImage.isClickable = false
+                    deleteStepImageButton.visibility = View.VISIBLE
+                }
             }
             stepImage.setOnClickListener {
-
-                TODO("Добавление картинки из галерии") //сюда clickable = false
-                    // в результат запихнуть крестик
+                image.launch(arrayOf("image/*"))
             }
             deleteStepImageButton.setOnClickListener {
-                TODO("Удаление изображения") //clickable = true
+                stepImage.setImageResource(R.drawable.ic_baseline_add_photo_alternate_24)
+                stepImage.tag = null
+                deleteStepImageButton.visibility = View.GONE
+                stepImage.isClickable = true
             }
             deleteStepButton.setOnClickListener {
-                //TODO Удали картинку
-                stepText.setText("")
                 root.visibility = View.GONE
+                prepareStepView()
             }
         }
 
@@ -75,18 +90,17 @@ class CreateRecipeFragment : Fragment() {
                 binding.createStepView.root.visibility = View.VISIBLE
                 return@setOnClickListener
             } else {
-                if (binding.createStepView.stepText.text.isBlank()) {   //TODO && нет картинки
-                    sendMyNotification(this.requireContext(), "Текст не может быть пустым")
+                val text = binding.createStepView.stepText.text
+                val imgUri = binding.createStepView.stepImage.tag
+                if (text.isNullOrBlank() && imgUri == null) {
+                    sendMyNotification(this.requireContext(), "Этап не может быть пустым")
                     return@setOnClickListener
                 } else {
-                    stepIndex++
                     viewModel.createIndexedStep(
-                        stepIndex,
-                        binding.createStepView.stepText.text.toString()
-                    ) //TODO тут путь на картинку
-                    binding.createStepView.stepTitle.text = "Этап №${stepIndex}"
-                    // TODO снести картинку
-                    binding.createStepView.stepText.setText("")
+                        position = stepIndex,
+                        text = text.toString(),
+                        imgPath = imgUri?.toString()
+                    )
                 }
             }
         }
@@ -98,12 +112,38 @@ class CreateRecipeFragment : Fragment() {
             if (title.isBlank() || author.isBlank()) {
                 sendMyNotification(
                     this.requireContext(),
-                    "Все поля должны быть заполнены"  // TODO hardcode
+                    "Все поля должны быть заполнены"
                 )
                 binding.scrollView.scrollTo(0, 0)
                 return@setOnClickListener
             }
-            viewModel.saveRecipe(title, category, author)
+            binding.titleEdit.text = null
+            binding.authorEdit.text = null
+            sendMyNotification(this.requireContext(), "Рецепт успешно сохранён")
+            if (viewModel.currentRecipe != null) {
+                viewModel.saveRecipe(title, category, author)
+                activity?.supportFragmentManager?.popBackStack()
+            } else viewModel.saveRecipe(title, category, author)
+        }
+
+        val recipeForEdit = viewModel.currentRecipe
+        if (recipeForEdit != null) {
+            with(binding) {
+                titleEdit.setText(recipeForEdit.title)
+                authorEdit.setText(recipeForEdit.author)
+                viewModel.indexedSteps.value = viewModel.getRecipesStepsById(recipeForEdit.id)
+            }
         }
     }.root
+
+    private fun prepareStepView() {
+        with(binding.createStepView) {
+            stepTitle.text = "Этап №${stepIndex + 1}"
+            stepText.setText("")
+            stepImage.setImageResource(R.drawable.ic_baseline_add_photo_alternate_24)
+            stepImage.tag = null
+            stepImage.isClickable = true
+            deleteStepImageButton.visibility = View.GONE
+        }
+    }
 }

@@ -4,9 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "allRecipes")
-class AllRecipeEntity(
-    @PrimaryKey(autoGenerate = true)
+@Entity(tableName = "recipes")
+class RecipesEntity(
+    @PrimaryKey
     @ColumnInfo(name = "id")
     val id: Long,
     @ColumnInfo(name = "title")

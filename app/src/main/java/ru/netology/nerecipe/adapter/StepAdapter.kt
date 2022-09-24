@@ -12,15 +12,12 @@ import ru.netology.nerecipe.adapter.dragAndDrop.ItemTouchHelperAdapter
 import ru.netology.nerecipe.databinding.StepViewHolderBinding
 import java.util.*
 
-class IndexedStepAdapter(
-    private val interactionListener: StepInteractionListener
-) : ListAdapter<Step, IndexedStepAdapter.StepViewHolder>(DiffCallback),
-    ItemTouchHelperAdapter {
+class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(DiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StepViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = StepViewHolderBinding.inflate(inflater, parent, false)
-        return StepViewHolder(binding, interactionListener)
+        return StepViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: StepViewHolder, position: Int) {
@@ -28,14 +25,13 @@ class IndexedStepAdapter(
     }
 
     class StepViewHolder(
-        private val binding: StepViewHolderBinding,
-        listener: StepInteractionListener
+        private val binding: StepViewHolderBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         private lateinit var step: Step
 
         init {
-            binding.deleteStepButton.setOnClickListener { listener.indexedStepDelete(step) }
+            binding.deleteStepButton.visibility = View.GONE
         }
 
         fun bind(step: Step) {
@@ -56,30 +52,5 @@ class IndexedStepAdapter(
 
         override fun areContentsTheSame(oldItem: Step, newItem: Step) =
             oldItem == newItem
-    }
-
-    override fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                val tempList = currentList.toMutableList()
-                Collections.swap(tempList, i, i + 1)
-                submitList(tempList)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                val tempList = currentList.toMutableList()
-                Collections.swap(tempList, i, i - 1)
-                submitList(tempList)
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition)
-        return true
-    }
-
-    override fun onItemDrop() {
-        val correctStepsTitlesList = currentList.mapIndexed { index, step ->
-            step.copy(position = index)
-        }
-        submitList(correctStepsTitlesList)
     }
 }

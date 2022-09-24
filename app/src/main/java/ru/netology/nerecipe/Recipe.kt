@@ -1,6 +1,5 @@
 package ru.netology.nerecipe
 
-import androidx.room.Ignore
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,15 +8,12 @@ data class Recipe(
     val title: String,
     val category: String,
     val author: String,
-    val favorite: Boolean = false
-    ) {
-    @Ignore
-    lateinit var steps: List<Step>
-}
+    val favorite: Boolean = false,
+    )
 
 @Serializable
 data class Step(
-    val id: Long,
+    val recipeId: Long = 0,
     val position: Int,
     val text: String,
     val imgPath: String? = null

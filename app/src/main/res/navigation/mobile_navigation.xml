@@ -10,9 +10,6 @@
         android:name="ru.netology.nerecipe.ui.navigationBar.RecipeListFragment"
         tools:layout="@layout/recipe_list"
         android:label="Все рецепты" >
-        <action
-            android:id="@+id/allRecipe_to_recipeFragment"
-            app:destination="@id/recipeFragment" />
     </fragment>
 
     <fragment
@@ -20,9 +17,6 @@
         android:name="ru.netology.nerecipe.ui.navigationBar.FavoriteRecipeListFragment"
         tools:layout="@layout/favorite_recipe_list"
         android:label="Избранное" >
-        <action
-            android:id="@+id/favorite_to_recipeFragment"
-            app:destination="@id/recipeFragment" />
     </fragment>
 
     <fragment
@@ -30,13 +24,8 @@
         android:name="ru.netology.nerecipe.ui.navigationBar.CreateRecipeFragment"
         tools:layout="@layout/create_recipe_fragment"
         android:label="Создать рецепт" />
-    <fragment
-        android:id="@+id/recipeFragment"
-        android:name="ru.netology.nerecipe.ui.RecipeFragment"
-        android:label="RecipeFragment" >
-        <argument
-            android:name="recipeId"
-            app:argType="long"
-            android:defaultValue="0L" />
-    </fragment>
+    <activity
+        android:id="@+id/mainActivity2"
+        android:name="ru.netology.nerecipe.ui.MainActivity"
+        android:label="MainActivity" />
 </navigation>

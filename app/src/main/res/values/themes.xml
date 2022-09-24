@@ -19,6 +19,12 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Widget.AppTheme.FavoriteButton" parent="Widget.MaterialComponents.Button.TextButton.Icon" >
+        <item name="icon">@drawable/ic_favorite_24</item>
+        <item name="iconTint">@color/favorite_button_tint</item>
+        <item name="android:textColor">?attr/colorControlNormal</item>
+    </style>
+
     <style name="Theme.NeRecipe.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.NeRecipe.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

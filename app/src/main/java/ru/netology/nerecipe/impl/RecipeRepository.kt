@@ -3,6 +3,7 @@ package ru.netology.nerecipe.impl
 import androidx.lifecycle.LiveData
 import ru.netology.nerecipe.Recipe
 import ru.netology.nerecipe.Step
+import ru.netology.nerecipe.db.RecipeWithSteps
 
 interface RecipeRepository {
     val allRecipeData: LiveData<List<Recipe>>
@@ -10,16 +11,13 @@ interface RecipeRepository {
 
     fun delete(recipeId: Long)
 
-    fun save(recipe: Recipe)
+    fun save(recipe: Recipe, steps: List<Step>)
 
-    fun favorite(recipe: Recipe)
+    fun favorite(recipeId: Long)
 
-    fun getRecipeById(id: Long) : Recipe?
+    fun getRecipeById(id: Long) : RecipeWithSteps?
 
-    fun getSteps(recipe: Recipe) : List<Step>
+    fun addDefaultData()
 
-    companion object {
-        const val NEW_RECIPE_ID = 0L
-        const val NEW_STEP_ID = 0L
-    }
+    fun getLastRecipeId() : Long
 }

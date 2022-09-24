@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recipe_view_holder"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
->
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/recipe_title"
@@ -14,8 +13,9 @@
         android:gravity="center"
         android:textAlignment="center"
         android:textSize="30sp"
-
-        app:layout_constraintEnd_toStartOf="@+id/favorite"
+        android:paddingStart="48dp"
+        android:paddingEnd="48dp"
+        app:layout_constraintEnd_toEndOf="@+id/favorite"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Котлетки с пюрешкой" />
@@ -39,29 +39,28 @@
         android:textColor="#0080FF"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/kitchen"
-        tools:text="Марина Жон" />
+        app:layout_constraintTop_toBottomOf="@+id/category"/>
 
     <TextView
-        android:id="@+id/kitchen"
+        android:id="@+id/category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="start"
         android:textSize="20sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="@+id/recipe_title"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/recipe_title"
         app:layout_constraintTop_toBottomOf="@+id/recipe_title"
         tools:text="Русская кухня" />
 
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/favorite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:backgroundTint="@android:color/transparent"
-        android:src="@drawable/ic_unfavorite_24"
+        style="@style/Widget.AppTheme.FavoriteButton"
+        android:checkable="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:src="@drawable/ic_favorite_24" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
