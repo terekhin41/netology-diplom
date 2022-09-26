@@ -1,5 +1,6 @@
 package ru.netology.nerecipe.ui.navigationBar
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -64,6 +65,8 @@ class CreateRecipeFragment : Fragment() {
         with(binding.createStepView) {
             val image = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
                 if (it != null) {
+                    requireActivity().contentResolver
+                        .takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     stepImage.setImageURI(it)
                     stepImage.tag = it
                     stepImage.isClickable = false

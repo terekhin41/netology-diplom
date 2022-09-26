@@ -21,7 +21,6 @@ class RecipeRepositoryImpl(
     }
 
     override fun save(recipe: Recipe, steps: List<Step>) {
-        //TODO проверить изменение количества шагов, будет заменяться или удалит и вставит
         val stepsEntities = steps.map { it.toEntity() }
         val recipeWithSteps = RecipeWithSteps(recipe.toEntity(), stepsEntities)
         recipeDao.insert(recipeWithSteps)
